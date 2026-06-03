@@ -9,39 +9,79 @@ on:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
-  prepare:
+  quality:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: ["1.24", "1.25"]
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.25"
           cache: true
-      - run: go mod download
+
+      - name: Download dependencies
+        run: go mod download
+
       - name: Install tools
         run: make install-tools
-      - run: make fmt-check
-      - run: make imports-check
-      - run: make lint
-      - run: make test-cover
-      - name: Quality gate
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Check imports
+        run: make imports-check
+
+      - name: Lint
+        run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: quality
+    strategy:
+      matrix:
+        go-version: ["1.24", "1.25"]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests with coverage
+        run: make test-cover
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: matrix.go-version == '1.25'
+        with:
+          name: coverage-report
+          path: coverage.out
+          retention-days: 30
+
+      - name: Quality gate - Test coverage
+        if: matrix.go-version == '1.25'
         env:
-          TESTCOVERAGE_THRESHOLD: 20
+          TESTCOVERAGE_THRESHOLD: 60
         run: |
           echo "Quality Gate: checking test coverage is above threshold ..."
           echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"
-          totalCoverage=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          totalCoverage=$(go tool cover -func=coverage.out | grep total | grep -oE '[0-9]+\.[0-9]+')
           echo "Current test coverage : $totalCoverage %"
           if (( $(echo "$totalCoverage $TESTCOVERAGE_THRESHOLD" | awk '{print ($1 > $2)}') )); then
-              echo "OK"
+              echo "✅ Coverage check passed"
           else
-              echo "Current test coverage is below threshold. Please add more unit tests or adjust threshold to a lower value."
-              echo "Failed"
+              echo "❌ Current test coverage is below threshold of $TESTCOVERAGE_THRESHOLD%"
               exit 1
           fi
+
       - name: Build
         run: go build -v ./...
