@@ -1,0 +1,68 @@
+# -------------------------------------------------------------------
+# Test
+# -------------------------------------------------------------------
+
+EXCLUDE_PACKAGES := models|query|mocks|tools|docs
+
+.PHONY: test
+test:
+	go test -v ./...
+
+.PHONY: test-race
+test-race:
+	go test -race -v ./...
+
+.PHONY: test-cover
+test-cover:
+	go test -race -cover $(shell go list ./... | grep -Ev "$(EXCLUDE_PACKAGES)") -coverprofile=coverage.out
+
+.PHONY: test-ci
+test-ci:
+	go test -race -coverprofile=coverage.out ./...
+
+# Add a threshold check — useful for CI enforcement later
+.PHONY: cover-check
+cover-check:
+	@TOTAL=$$(go tool cover -func=coverage.out | grep "^total" | awk '{print $$NF}' | tr -d '%'); \
+	echo "Total coverage: $$TOTAL%"; \
+	if [ $$(echo "$$TOTAL < 80" | bc) -eq 1 ]; then \
+		echo "FAIL: coverage $$TOTAL% is below 80% threshold"; exit 1; \
+	fi
+
+.PHONY: test-integration
+test-integration:
+	go test -v -tags=integration ./...
+
+.PHONY: cover-html
+cover-html:
+	go tool cover -html=coverage.out -o coverage.html
+	xdg-open coverage.html
+	@echo "Coverage report: coverage.html"
+
+.PHONY: cover-func
+cover-func:
+	go tool cover -func=coverage.out
+
+.PHONY: low-cover
+low-cover:
+	go tool cover -func=coverage.out | grep -v "^total" | awk '$$NF+0 < 85 {print}'
+
+.PHONY: test-failed
+test-failed:
+	@go test -race -v ./... 2>&1 | tee test.log | grep -A 20 "FAIL\|panic\|Error\|---FAIL"
+	@echo "Full log: test.log"
+
+.PHONY: test-fresh
+test-fresh:
+	go clean -testcache
+
+.PHONY: test-clean
+test-clean:
+	go test -coverprofile=coverage.out \
+		$(shell go list ./... | grep -v "/query")
+	go tool cover -func=coverage.out
+
+.PHONY: cover-clean
+cover-clean:
+	find . -type f \( -name "coverage.out" -o -name "coverage.html" \) -delete
+	@echo "Coverage files removed"

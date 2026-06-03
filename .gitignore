@@ -14,3 +14,5 @@
 /config.yml
 /secret
 /secret.yml
+coverage.out
+coverage.html
