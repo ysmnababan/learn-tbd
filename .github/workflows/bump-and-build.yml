@@ -1,19 +1,31 @@
-name: build-and-push-image
+name: bump-and-build
 
 on:
-  push:
-    tags:
-      - "v*"
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
 
 jobs:
-  docker:
+  bump-and-build:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: "0"
+
+      - name: Bump version and push tag
+        id: tag
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_PREFIX: v
+          DEFAULT_BUMP: patch
+          RELEASE_BRANCHES: master
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -29,6 +41,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/learn-tbd:${{ github.ref_name }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/learn-tbd:${{ steps.tag.outputs.new_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
