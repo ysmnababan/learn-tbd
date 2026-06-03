@@ -13,17 +13,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download version artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: version
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
-
-      - name: Get version
+      - name: Get latest version from git tag
         id: version
         run: |
-          VERSION=$(cat version.txt)
+          VERSION=$(git describe --tags --abbrev=0)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "image=${{ secrets.DOCKERHUB_USERNAME }}/learn-tbd:$VERSION" >> $GITHUB_OUTPUT
 
