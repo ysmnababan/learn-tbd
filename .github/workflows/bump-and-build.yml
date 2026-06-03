@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      new_tag: ${{ steps.tag.outputs.new_tag }}
+      image: ${{ secrets.DOCKERHUB_USERNAME }}/learn-tbd:${{ steps.tag.outputs.new_tag }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -44,3 +47,66 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/learn-tbd:${{ steps.tag.outputs.new_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy-dev:
+    needs: bump-and-build
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Deploy to dev
+        run: |
+          echo "═══════════════════════════════════════════"
+          echo "  🚀 DEV DEPLOYMENT"
+          echo "═══════════════════════════════════════════"
+          echo "  Version: ${{ needs.bump-and-build.outputs.new_tag }}"
+          echo "  Image:   ${{ needs.bump-and-build.outputs.image }}"
+          echo "═══════════════════════════════════════════"
+
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Dev Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.bump-and-build.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ needs.bump-and-build.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Deployed" >> $GITHUB_STEP_SUMMARY
+
+  deploy-staging:
+    needs: bump-and-build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "═══════════════════════════════════════════"
+          echo "  🚀 STAGING DEPLOYMENT"
+          echo "═══════════════════════════════════════════"
+          echo "  Version: ${{ needs.bump-and-build.outputs.new_tag }}"
+          echo "  Image:   ${{ needs.bump-and-build.outputs.image }}"
+          echo "═══════════════════════════════════════════"
+
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Staging Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.bump-and-build.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ needs.bump-and-build.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Deployed" >> $GITHUB_STEP_SUMMARY
+
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Deploy to prod
+        run: |
+          echo "═══════════════════════════════════════════"
+          echo "  🚀 PROD DEPLOYMENT"
+          echo "═══════════════════════════════════════════"
+          echo "  Version: ${{ needs.bump-and-build.outputs.new_tag }}"
+          echo "  Image:   ${{ needs.bump-and-build.outputs.image }}"
+          echo "═══════════════════════════════════════════"
+
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Prod Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.bump-and-build.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ needs.bump-and-build.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Deployed" >> $GITHUB_STEP_SUMMARY
