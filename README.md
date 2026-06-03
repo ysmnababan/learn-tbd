@@ -1,4 +1,3 @@
 # Trunk Based Development Demo
 
-This is a demo for the TBD branching approach.
-
+This is a demo for the Trunk Based Development branching approach.
