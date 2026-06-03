@@ -10,7 +10,7 @@ import (
 
 func TestEntityBeforeCreate(t *testing.T) {
 	tests := []struct {
-		name string
+		name   string
 		entity *Entity
 		verify func(t *testing.T, entity *Entity)
 	}{
@@ -51,7 +51,7 @@ func TestEntityBeforeCreate(t *testing.T) {
 
 func TestEntityBeforeUpdate(t *testing.T) {
 	tests := []struct {
-		name string
+		name   string
 		entity *Entity
 		verify func(t *testing.T, entity *Entity)
 	}{
@@ -86,7 +86,7 @@ func TestEntityBeforeUpdate(t *testing.T) {
 			},
 		},
 		{
-			name: "handles nil entity",
+			name:   "handles nil entity",
 			entity: &Entity{},
 			verify: func(t *testing.T, entity *Entity) {
 				assert.NotNil(t, entity.ModifiedAt)

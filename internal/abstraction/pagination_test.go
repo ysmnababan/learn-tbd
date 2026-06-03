@@ -343,10 +343,10 @@ func TestPaginationGetSorting(t *testing.T) {
 
 func TestNewSorting(t *testing.T) {
 	tests := []struct {
-		name      string
-		sortBy    string
-		sort      string
-		expected  *Sorting
+		name     string
+		sortBy   string
+		sort     string
+		expected *Sorting
 	}{
 		{
 			name:     "asc order",
@@ -384,19 +384,19 @@ func TestNewSorting(t *testing.T) {
 
 func TestNewPageInfo(t *testing.T) {
 	tests := []struct {
-		name      string
-		count     int
+		name        string
+		count       int
 		moreRecords bool
-		page      *Pagination
-		sorting   *Sorting
-		verify    func(t *testing.T, info *PaginationInfo)
+		page        *Pagination
+		sorting     *Sorting
+		verify      func(t *testing.T, info *PaginationInfo)
 	}{
 		{
-			name:      "with nil sorting",
-			count:     10,
+			name:        "with nil sorting",
+			count:       10,
 			moreRecords: true,
-			page:      &Pagination{Page: 1, PageSize: 50},
-			sorting:   nil,
+			page:        &Pagination{Page: 1, PageSize: 50},
+			sorting:     nil,
 			verify: func(t *testing.T, info *PaginationInfo) {
 				assert.Equal(t, 10, info.Count)
 				assert.Equal(t, true, info.MoreRecords)
@@ -408,11 +408,11 @@ func TestNewPageInfo(t *testing.T) {
 			},
 		},
 		{
-			name:      "with sorting",
-			count:     20,
+			name:        "with sorting",
+			count:       20,
 			moreRecords: false,
-			page:      &Pagination{Page: 2, PageSize: 25},
-			sorting:   &Sorting{SortBy: "id", OrderBy: "asc"},
+			page:        &Pagination{Page: 2, PageSize: 25},
+			sorting:     &Sorting{SortBy: "id", OrderBy: "asc"},
 			verify: func(t *testing.T, info *PaginationInfo) {
 				assert.Equal(t, 20, info.Count)
 				assert.Equal(t, false, info.MoreRecords)
@@ -444,8 +444,8 @@ func TestPaginationApply(t *testing.T) {
 	db.AutoMigrate(&TestModel{})
 
 	tests := []struct {
-		name string
-		page *Pagination
+		name   string
+		page   *Pagination
 		verify func(t *testing.T, db *gorm.DB)
 	}{
 		{
