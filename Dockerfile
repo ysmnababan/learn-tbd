@@ -28,9 +28,6 @@ RUN apk add --no-cache tzdata
 # Copy only the built binary from the builder image
 COPY --from=builder /app/main .
 
-# Copy the .env files
-COPY .env .
-
 # Document the port (for clarity and tooling)
 EXPOSE 1323
 
