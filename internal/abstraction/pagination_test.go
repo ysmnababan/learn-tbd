@@ -441,7 +441,7 @@ func TestPaginationApply(t *testing.T) {
 		Name string
 	}
 
-	db.AutoMigrate(&TestModel{})
+	_ = db.AutoMigrate(&TestModel{})
 
 	tests := []struct {
 		name   string

@@ -15,7 +15,6 @@ import (
 )
 
 func Init(e *echo.Echo) {
-
 	e.Use(
 		Recover,
 		echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
@@ -34,7 +33,7 @@ func Recover(next echo.HandlerFunc) echo.HandlerFunc {
 				stackTrace := debug.Stack()
 				log.Error().Any("error", r).RawJSON("stackTrace", stackTrace).Send()
 
-				c.JSON(500, map[string]any{
+				_ = c.JSON(500, map[string]any{
 					"message": "something went wrong",
 				})
 			}
