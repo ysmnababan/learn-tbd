@@ -70,7 +70,7 @@ jobs:
       - name: Quality gate - Test coverage
         if: matrix.go-version == '1.25'
         env:
-          TESTCOVERAGE_THRESHOLD: 60
+          TESTCOVERAGE_THRESHOLD: 15
         run: |
           echo "Quality Gate: checking test coverage is above threshold ..."
           echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"

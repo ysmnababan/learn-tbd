@@ -15,7 +15,7 @@ func NewRepo(db *gorm.DB) *userRepo {
 
 func (r *userRepo) Get(ctx echo.Context) (out []*UserModel, err error) {
 	out = []*UserModel{}
-	res := r.DB.Find(&out)
+	res := r.Find(&out)
 	if res.Error != nil {
 		err = res.Error
 		return
