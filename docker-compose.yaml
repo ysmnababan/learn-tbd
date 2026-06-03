@@ -1,0 +1,39 @@
+services:
+
+
+  db:
+    image: postgres:16.2-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=mydatabase
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  backend:
+    build:
+      context: .
+    container_name: backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy 
+    ports:
+      - "1323:1323"
+    networks:
+      - backend
+volumes:
+  db-data:
+
+networks:
+  backend:

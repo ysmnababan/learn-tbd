@@ -1,0 +1,11 @@
+package example_feat
+
+import (
+	"github.com/labstack/echo/v4"
+)
+
+func (h *handler) Route(g *echo.Group) {
+	g.GET("", h.GetUsers)
+	g.POST("", h.CreateUser)
+	g.POST("/auth", h.Login)
+}
