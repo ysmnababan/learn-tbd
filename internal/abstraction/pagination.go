@@ -78,7 +78,6 @@ func (p *Pagination) Apply(db *gorm.DB) {
 	}
 }
 
-// Return SortBy value if not nil with OrderBy value with default asc
 func (p *Pagination) GetSortBy() string {
 	var sort string
 
